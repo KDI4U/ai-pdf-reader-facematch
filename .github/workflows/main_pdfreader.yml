@@ -1,0 +1,62 @@
+# Build and push Python app to Azure Container Registry
+name: Build and Push Python App to Azure Container Registry
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+  REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+  REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+  IMAGE_NAME: pdfreader
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        run: |
+          git clone --depth 1 --branch ${{ github.ref_name }} https://x-access-token:${{ github.token }}@github.com/${{ github.repository }} .
+          git checkout ${{ github.sha }}
+
+      - name: Set up Docker Buildx
+        run: |
+          docker buildx create --use --name mybuilder || docker buildx use mybuilder
+          docker buildx inspect --bootstrap
+
+      - name: Log in to Azure Container Registry
+        run: |
+          echo "${{ env.REGISTRY_PASSWORD }}" | docker login ${{ env.REGISTRY_URL }} \
+            --username ${{ env.REGISTRY_USERNAME }} \
+            --password-stdin
+
+      - name: Build and push Docker image
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            --tag ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --tag ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:latest \
+            --push \
+            .
+
+      - name: Logout from Docker Registry
+        if: always()
+        run: docker logout ${{ env.REGISTRY_URL }}
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}      
+
+      - name: Restart App Service
+        run: az webapp restart --name ${{ env.IMAGE_NAME }} --resource-group rg-website-dev
+      
+      - name: Logout from Azure CLI
+        if: always()
+        run: az logout
+
+          

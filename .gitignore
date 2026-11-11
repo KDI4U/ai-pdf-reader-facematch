@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+.pytest_cache/
+.mypy_cache/
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Environment Variables & Secrets
+.env
+*.env
+!.env.example
+
+# Temporary Uploads, Processing Caches & Identity Media
+uploads/
+**/uploads/
+**/uploads/**
+photo/
+**/photo/
+**/photo/**
+temp/
+**/temp/
+**/temp/**
+ab/split_output/
+**/split_output/
+**/split_output/**
+
+# Keep Deep Learning ONNX Models
+!models/
+!models/*.onnx
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+pikepdf
+pdfplumber
+PyPDF2
+python-multipart
+pikepdf
+pillow
+pymupdf 
+numpy
+pandas
+pytesseract
+opencv-python-headless
+easyocr
+torch
+torchvision
+pdf2image
